@@ -1,0 +1,44 @@
+# https://help.github.com/en/articles/metadata-syntax-for-github-actions
+name: Docker Compose Setup
+description: Install Docker Compose
+branding:
+  icon: anchor
+  color: blue
+
+inputs:
+  version:
+    description: 'Compose release (example: v2.2.0)'
+    required: false
+    default: latest
+  legacy:
+    description: 'Also install as legacy "docker-compose"'
+    required: false
+    default: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: install 
+      shell: bash
+      run: |
+        set -x
+        set -e
+        arch="$(uname)-$(uname -m)"
+        flavor=$(echo $arch | tr '[:upper:]' '[:lower:]' )
+
+        DOWNLOAD_URL="https://github.com/docker/compose/releases/download/${{ inputs.version }}/docker-compose-${flavor}"
+        if [[ "${{ inputs.version }}" == "latest" ]]; then
+          DOWNLOAD_URL=$(curl -fL https://api.github.com/repos/docker/compose/releases/latest | jq -r '.assets[] | select(.name == "docker-compose-linux-x86_64") | .browser_download_url')
+        fi
+
+        echo "Download Compose ${{ inputs.version }} for ${flavor} from ${DOWNLOAD_URL}"
+        mkdir -p ~/.docker/cli-plugins/
+        curl -fsSL "$DOWNLOAD_URL" -o ~/.docker/cli-plugins/docker-compose
+        chmod +x ~/.docker/cli-plugins/docker-compose
+    - name: alias docker-compose
+      if: ${{ inputs.legacy }}
+      shell: bash
+      run: |
+        mkdir -p ~/.local/bin/
+        ln -s ~/.docker/cli-plugins/docker-compose ~/.local/bin/docker-compose 
+  

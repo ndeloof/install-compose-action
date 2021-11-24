@@ -1,0 +1,29 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        release: [latest, v2.2.0]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Compose
+        uses: ./
+        with:
+          version: ${{ matrix.release }}
+
+      - name: Test installation
+        run: |
+          docker compose version
+          docker-compose --version
