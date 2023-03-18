@@ -40,5 +40,4 @@ runs:
       shell: bash
       run: |
         mkdir -p ~/.local/bin/
-        ln -s ~/.docker/cli-plugins/docker-compose ~/.local/bin/docker-compose 
-  
+        ln -sf ~/.docker/cli-plugins/docker-compose ~/.local/bin/docker-compose
